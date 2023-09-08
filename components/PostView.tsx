@@ -4,8 +4,6 @@ import { useSession } from "next-auth/react";
 import { format, parseISO, formatDistance } from "date-fns";
 
 import Image from "next/image";
-import { Tooltip } from "react-tooltip";
-import CommentDialog from "./CommentDialog";
 import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
 import {
   AiOutlineComment,
@@ -15,20 +13,19 @@ import {
 } from "react-icons/ai";
 
 import { Post, User } from "@/common.types";
-import "react-tooltip/dist/react-tooltip.css";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
+import UserLikesDialog from "./UserLikesDialog";
 
 type Props = {
   post: Post;
   handleDelete?: Function;
 };
 
-const PostCard = ({ post, handleDelete }: Props) => {
+const PostView = ({ post, handleDelete }: Props) => {
   const { data: session } = useSession();
   const router = useRouter();
   const [currentPost, setCurrentPost] = useState(post);
-  const [agoTime, setAgoTime] = useState("");
   const [postTime, setPostTime] = useState("");
   const [liked, setLiked] = useState(false);
   const [totalLikes, setTotalLikes] = useState(0);
@@ -48,16 +45,8 @@ const PostCard = ({ post, handleDelete }: Props) => {
     // Format the time of when the post was created.
     const stringParsedToDate = parseISO(currentPost.timePosted);
     const dateOfCreation = format(stringParsedToDate, "h:mm aaa - d LLL y");
-    const distanceFromCreation = formatDistance(
-      new Date(),
-      stringParsedToDate,
-      {
-        includeSeconds: true,
-      }
-    );
 
     setPostTime(dateOfCreation); // Hour and date of when the post was created.
-    setAgoTime(distanceFromCreation); // Specifices how long ago the post was published.
   };
 
   const handleLike = async (e: React.MouseEvent) => {
@@ -126,10 +115,6 @@ const PostCard = ({ post, handleDelete }: Props) => {
     }
   };
 
-  const handlePostClick = () => {
-    router.push(`/post/${post._id}`);
-  };
-
   const handleProfileClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -153,27 +138,15 @@ const PostCard = ({ post, handleDelete }: Props) => {
         const data = await response.json();
         setUsersWhoLiked((prev) => [data, ...prev]);
       });
+
+      setIsOpen(true);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleCommentClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!session?.user) {
-      alert("You must be logged in to leave a comment.");
-      return;
-    }
-
-    setIsOpen(true);
-  };
-
   return (
-    <article
-      className="post_card hover:cursor-pointer"
-      onClick={handlePostClick}
-    >
+    <div className="post_card">
       <div className="flex gap-3">
         <div
           className="flex-center hover:cursor-pointer"
@@ -194,14 +167,6 @@ const PostCard = ({ post, handleDelete }: Props) => {
           </div>
           <p className="text-sm">{currentPost.creator.email}</p>
         </div>
-
-        <span
-          data-tooltip-id={currentPost._id}
-          className="text-sm"
-          style={{ marginLeft: "auto" }}
-        >
-          {`${agoTime} ago`}
-        </span>
 
         {/* Post setting menu, signified by the cog icon */}
         <div
@@ -230,52 +195,49 @@ const PostCard = ({ post, handleDelete }: Props) => {
       <div className="text-sm">{currentPost.text}</div>
       <img src={currentPost.image} className="object-contain image_styles" />
 
+      <span className="text-sm">{postTime}</span>
+
       <hr />
 
-      <div className="flex gap-3">
-        <div className="flex-center gap-2">
-          <button
-            type="button"
-            className="btn-like"
-            onClick={handleLike}
-            disabled={isSubmitting}
-          >
-            {liked ? (
-              <AiFillHeart size={20} color="rgb(249 24 128)" />
-            ) : (
-              <AiOutlineHeart size={20} />
-            )}
-          </button>
-          <div className="likes" onClick={handleLikesClick}>
-            {totalLikes}
-          </div>
-        </div>
-
-        <div className="flex-center gap-2">
-          <button
-            type="button"
-            className="btn-comment"
-            onClick={handleCommentClick}
-            disabled={isSubmitting}
-          >
-            <AiOutlineComment size={20} />
-          </button>
-          <div className="comments">{currentPost.comments.length}</div>
+      {/* General information about the post */}
+      <div className="flex gap-5">
+        <button type="button" onClick={handleLikesClick}>
+          <span className="font-extrabold">{totalLikes}</span> Likes
+        </button>
+        <div>
+          <span className="font-extrabold">{post.comments.length}</span>{" "}
+          Comments
         </div>
       </div>
 
-      <CommentDialog
+      <hr />
+
+      <div className="flex-center gap-8">
+        <button
+          type="button"
+          className="btn-like"
+          onClick={handleLike}
+          disabled={isSubmitting}
+        >
+          {liked ? (
+            <AiFillHeart size={25} color="rgb(249 24 128)" />
+          ) : (
+            <AiOutlineHeart size={25} />
+          )}
+        </button>
+
+        <button type="button" className="btn-comment">
+          <AiOutlineComment size={25} />
+        </button>
+      </div>
+
+      <UserLikesDialog
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        postId={currentPost._id}
-        postUser={currentPost.creator}
-        postImage={currentPost.image}
-        postCommentsIds={currentPost.comments}
-        agoTime={agoTime}
+        users={usersWhoLiked}
       />
-      <Tooltip id={currentPost._id} place="bottom" content={postTime} />
-    </article>
+    </div>
   );
 };
 
-export default PostCard;
+export default PostView;

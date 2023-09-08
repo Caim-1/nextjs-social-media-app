@@ -1,8 +1,8 @@
-import Post from "@/models/post";
 import { connectToDB } from "@/utils/database";
-import { NextApiRequest } from "next";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import Post from "@/models/post";
 
-export const GET = async (request: Request, { params }: any) => {
+export const GET = async (request: Request, { params }: Params) => {
   try {
     await connectToDB();
 
@@ -14,14 +14,20 @@ export const GET = async (request: Request, { params }: any) => {
   }
 };
 
-export const PATCH = async (request: Request, { params }: any) => {
-  const { likes } = await request.json();
+export const PATCH = async (request: Request, { params }: Params) => {
+  const { likes, comments } = await request.json();
 
   try {
     await connectToDB();
 
     // Find the post by ID and update it
-    await Post.findByIdAndUpdate(params.id, { likes: likes });
+    if (likes) {
+      await Post.findByIdAndUpdate(params.id, { likes: likes });
+    }
+
+    if (comments) {
+      await Post.findByIdAndUpdate(params.id, { comments: comments });
+    }
 
     return new Response("Post updated successfully", { status: 200 });
   } catch (error) {
@@ -29,7 +35,7 @@ export const PATCH = async (request: Request, { params }: any) => {
   }
 };
 
-export const DELETE = async (request: Request, { params }: any) => {
+export const DELETE = async (request: Request, { params }: Params) => {
   try {
     await connectToDB();
 

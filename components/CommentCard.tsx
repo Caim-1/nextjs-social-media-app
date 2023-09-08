@@ -130,7 +130,7 @@ const CommentCard = ({ comment, handleDelete }: Props) => {
   };
 
   return (
-    <div className="flex flex-col gap-3 post p-4 rounded-2xl w-full hover:cursor-pointer">
+    <div className="post_card">
       <div className="flex gap-3">
         <div
           className="flex flex-center hover:cursor-pointer"

@@ -1,7 +1,8 @@
 import { connectToDB } from "@/utils/database";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import Comment from "@/models/comment";
 
-export const GET = async (request: Request, { params }: any) => {
+export const GET = async (request: Request, { params }: Params) => {
   try {
     await connectToDB();
 
@@ -15,7 +16,7 @@ export const GET = async (request: Request, { params }: any) => {
   }
 };
 
-export const PATCH = async (request: Request, { params }: any) => {
+export const PATCH = async (request: Request, { params }: Params) => {
   const { likes } = await request.json();
 
   try {
@@ -27,5 +28,18 @@ export const PATCH = async (request: Request, { params }: any) => {
     return new Response("Comment updated successfully", { status: 200 });
   } catch (error) {
     return new Response("Error updating comment", { status: 500 });
+  }
+};
+
+export const DELETE = async (request: Request, { params }: Params) => {
+  try {
+    await connectToDB();
+
+    // Find the comment by ID and remove it
+    await Comment.findByIdAndRemove(params.id);
+
+    return new Response("Comment deleted successfully", { status: 200 });
+  } catch (error) {
+    return new Response("Error deleting comment", { status: 500 });
   }
 };

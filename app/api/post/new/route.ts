@@ -6,6 +6,7 @@ export const POST = async (request: Request) => {
 
   try {
     await connectToDB();
+
     const newPost = new Post({
       creator: userId,
       text,

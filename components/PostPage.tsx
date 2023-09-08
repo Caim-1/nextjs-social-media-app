@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PostCard from "./PostCard";
-import CreateComment from "./CreateComment";
-import CommentCard from "./CommentCard";
-import { Comment, Post } from "@/common.types";
+import { useSession } from "next-auth/react";
 import { deleteCommentFromDB, deletePostFromDB } from "@/utils/utils";
+
+import PostView from "./PostView";
+import CommentCard from "./CommentCard";
+import CreateComment from "./CreateComment";
+
+import { Comment, Post } from "@/common.types";
 
 type Props = {
   post: Post;
 };
 
 const PostPage = ({ post }: Props) => {
+  const { data: session } = useSession();
   const [currentPost, setCurrentPost] = useState(post);
   const [comments, setComments] = useState<Comment[]>([]);
 
@@ -23,7 +27,7 @@ const PostPage = ({ post }: Props) => {
     try {
       const response = await fetch(`/api/comment/${currentPost._id}`);
       const data = await response.json();
-      console.log(data);
+
       setComments(data.reverse());
     } catch (error) {
       console.log(error);
@@ -57,9 +61,17 @@ const PostPage = ({ post }: Props) => {
   };
 
   return (
-    <div className="feed">
-      <PostCard post={currentPost} handleDelete={handlePostDelete} />
-      <CreateComment postId={currentPost._id} fetchComments={fetchComments} />
+    <section className="feed">
+      <PostView post={currentPost} handleDelete={handlePostDelete} />
+
+      {session && (
+        <CreateComment
+          postId={currentPost._id}
+          comments={currentPost.comments}
+          fetchComments={fetchComments}
+        />
+      )}
+
       {comments.map((comment) => (
         <CommentCard
           key={comment._id}
@@ -67,7 +79,7 @@ const PostPage = ({ post }: Props) => {
           handleDelete={handleCommentDelete}
         />
       ))}
-    </div>
+    </section>
   );
 };
 

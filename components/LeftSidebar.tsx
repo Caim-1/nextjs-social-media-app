@@ -1,37 +1,26 @@
 "use client";
 
-import { IoMdHome } from "react-icons/io";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { FaUser } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { IoMdHome } from "react-icons/io";
 
 const LeftSidebar = () => {
-  const router = useRouter();
-
-  const handleRedirect = (destination: string) => {
-    if (destination === "home") {
-      router.push("/");
-    } else if (destination === "profile") {
-      router.push("/profile");
-    }
-  };
+  const { data: session } = useSession();
 
   return (
-    <div className="sidebar sbleft rounded-2xl">
-      <button
-        className="sidebar_item rounded-2xl"
-        onClick={() => handleRedirect("home")}
-      >
+    <aside className="sidebar sbleft">
+      <Link href="/" className="sidebar_item">
         <IoMdHome size={25} />
-        <span className="font-semibold">Home</span>
-      </button>
-      <button
-        className="sidebar_item rounded-2xl"
-        onClick={() => handleRedirect("profile")}
-      >
-        <FaUser size={25} />
-        <span className="font-semibold">Profile</span>
-      </button>
-    </div>
+        <span>Home</span>
+      </Link>
+      {session && (
+        <Link href="/profile" className="sidebar_item">
+          <FaUser size={25} />
+          <span>Profile</span>
+        </Link>
+      )}
+    </aside>
   );
 };
 

@@ -1,5 +1,5 @@
 const RightSidebar = () => {
-  return <div className="sidebar sbright rounded-2xl">Right</div>;
+  return <aside className="sidebar sbright">Right</aside>;
 };
 
 export default RightSidebar;

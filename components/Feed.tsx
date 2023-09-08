@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
-import { Post } from "@/common.types";
 import { deletePostFromDB } from "@/utils/utils";
+import { Post } from "@/common.types";
 
 const Feed = () => {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
@@ -37,12 +37,12 @@ const Feed = () => {
   };
 
   return (
-    <div className="feed">
+    <section className="feed">
       <CreatePost fetchPosts={fetchPosts} />
       {allPosts.map((post) => (
         <PostCard key={post._id} post={post} handleDelete={handleDelete} />
       ))}
-    </div>
+    </section>
   );
 };
 

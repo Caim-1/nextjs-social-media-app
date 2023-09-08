@@ -19,7 +19,7 @@ const CreatePost = ({ fetchPosts }: Props) => {
   const [image, setImage] = useState<any>("");
   const [submitting, setIsSubmitting] = useState(false);
 
-  const createPost = async (e: React.MouseEvent) => {
+  const createPost = async () => {
     if (text === "" && image === "") {
       alert("Cannot publish an empty post");
       return;
@@ -63,11 +63,12 @@ const CreatePost = ({ fetchPosts }: Props) => {
   };
 
   if (!session) {
-    return <div></div>;
+    return null;
   }
 
   return (
-    <div className="create_post rounded-2xl p-4">
+    <div className="create_post">
+      {/* User profile picture & post text content input */}
       <div className="flex gap-3 w-full">
         <Link href="/profile">
           <Image
@@ -86,6 +87,7 @@ const CreatePost = ({ fetchPosts }: Props) => {
         />
       </div>
 
+      {/* Preview the image that is supposed to be uploaded */}
       {image && (
         <div className="flex relative my-3">
           <button
@@ -96,18 +98,26 @@ const CreatePost = ({ fetchPosts }: Props) => {
             <RiCloseCircleFill size={30} />
           </button>
 
-          <img src={image} className="object-contain image_styles" />
+          <Image
+            src={image}
+            width={400}
+            height={400}
+            className="object-contain image_styles"
+            alt="preview upload image"
+          />
         </div>
       )}
 
+      {/* Section divider */}
       <hr className="my-3 w-full" />
 
+      {/* Image upload & post publish */}
       <div className="flex-between w-full">
-        <label htmlFor="formId" className="hover:cursor-pointer">
+        <label htmlFor="postImageId" className="hover:cursor-pointer">
           <input
             name=""
             type="file"
-            id="formId"
+            id="postImageId"
             accept="image/*"
             hidden
             onChange={(e) => handleFileUpload(e)}

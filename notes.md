@@ -17,6 +17,15 @@ TO-DO:
 
 - Friend requests
 
+Profile:
+
+- add a date signifying account's creation time upon account creation.
+- profile banner.
+
+Posts:
+
+- Likes: add dates to likes so that liked posts displayed on the user profile
+
 Feed:
 
 - merge the handleDelete function for posts with the comment equivalent.

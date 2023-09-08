@@ -2,17 +2,26 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
+import { convertToBase64 } from "@/utils/utils";
+
 import Link from "next/link";
-import { BsFillFileEarmarkImageFill } from "react-icons/bs";
+import Image from "next/image";
 import { RiCloseCircleFill } from "react-icons/ri";
+import { BsFillFileEarmarkImageFill } from "react-icons/bs";
 
 type Props = {
   postId: string;
-  fetchComments: Function;
+  comments: string[];
+  fetchComments?: Function;
+  setIsOpen?: Function;
 };
 
-const CreateComment = ({ postId, fetchComments }: Props) => {
+const CreateComment = ({
+  postId,
+  comments,
+  fetchComments,
+  setIsOpen,
+}: Props) => {
   const { data: session } = useSession();
   const [text, setText] = useState("");
   const [image, setImage] = useState<any>("");
@@ -29,7 +38,7 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
     setIsSubmitting(true);
 
     try {
-      await fetch("/api/comment/new", {
+      const response = await fetch("/api/comment/new", {
         method: "POST",
         body: JSON.stringify({
           userId: session?.user.id,
@@ -41,8 +50,24 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
         }),
       });
 
-      clearForm();
-      fetchComments();
+      const commentData = await response.json();
+      const updatedComments = [commentData._id, ...comments];
+
+      await fetch(`/api/post/${postId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          comments: updatedComments,
+        }),
+      });
+
+      if (fetchComments) {
+        clearForm();
+        fetchComments();
+      } else if (setIsOpen) {
+        setIsOpen(false);
+      }
+
+      alert("Comment submitted successfully.");
     } catch (error) {
       console.log(error);
     } finally {
@@ -62,19 +87,6 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
     const base64 = await convertToBase64(file);
 
     setImage(base64);
-  };
-
-  const convertToBase64 = (file: Blob) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-    });
   };
 
   return (
@@ -97,6 +109,7 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
         />
       </div>
 
+      {/* Image preview */}
       {image && (
         <div className="flex relative my-3">
           <button
@@ -107,7 +120,13 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
             <RiCloseCircleFill size={30} />
           </button>
 
-          <img src={image} className="object-contain image_styles" />
+          <Image
+            src={image}
+            width={200}
+            height={200}
+            className="object-contain image_styles"
+            alt="preview upload image"
+          />
         </div>
       )}
 
@@ -115,12 +134,12 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
 
       <div className="flex-between w-full">
         <div>
-          <label htmlFor="formId" className="hover:cursor-pointer">
+          <label htmlFor="commentImageId" className="hover:cursor-pointer">
             <input
               name=""
               type="file"
-              id="formId"
-              accept=".jpeg, .png, .jpg"
+              id="commentImageId"
+              accept="image/*"
               hidden
               onChange={(e) => handleFileUpload(e)}
             />
@@ -141,25 +160,3 @@ const CreateComment = ({ postId, fetchComments }: Props) => {
 };
 
 export default CreateComment;
-
-// const commentedPost = {
-//   ...post,
-//   comments: [
-//     {
-//       creator: session?.user.id,
-//       text: text,
-//       image: image,
-//       timePosted: new Date(),
-//       likes: [],
-//     },
-//     ...post.comments,
-//   ],
-// };
-
-// await fetch(`/api/post/${post._id}`, {
-//   method: "PATCH",
-//   body: JSON.stringify({
-//     comments: commentedPost.comments,
-//     type: "comment",
-//   }),
-// });

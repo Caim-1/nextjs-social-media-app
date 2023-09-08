@@ -1,5 +1,7 @@
-import Provider from "@/components/Provider";
 import Navbar from "@/components/Navbar";
+import Provider from "@/components/Provider";
+import LeftSidebar from "@/components/LeftSidebar";
+import RightSidebar from "@/components/RightSidebar";
 import "./globals.css";
 
 export const metadata = {
@@ -16,9 +18,17 @@ export default function RootLayout({
     <html lang="en">
       <Provider>
         <body>
-          <Navbar />
-          <div className="main" />
-          <main className="app">{children}</main>
+          <header>
+            <Navbar />
+          </header>
+
+          <div className="grid-background" />
+
+          <main>
+            <LeftSidebar />
+            {children}
+            <RightSidebar />
+          </main>
         </body>
       </Provider>
     </html>

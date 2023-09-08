@@ -5,7 +5,7 @@ export type Post = {
   image: string;
   timePosted: string;
   likes: string[];
-  comments: Comment[];
+  comments: string[]; //Comment[];
 };
 
 export type User = {

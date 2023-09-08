@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Post } from "@/common.types";
+import Loading from "@/components/Loading";
 import PostPage from "@/components/PostPage";
-import RightSidebar from "@/components/RightSidebar";
-import LeftSidebar from "@/components/LeftSidebar";
+import { Post } from "@/common.types";
 
 const page = ({ params }: any) => {
   const [post, setPost] = useState<Post>();
@@ -19,15 +18,9 @@ const page = ({ params }: any) => {
     if (params?.id) fetchPost();
   }, [params.id]);
 
-  if (!post) return <div>Cannot find post of such ID.</div>; // To be changed.
+  if (!post) return <Loading />; // To be changed.
 
-  return (
-    <section className="home_grid my-10 mx-6">
-      <LeftSidebar />
-      <PostPage post={post} />
-      <RightSidebar />
-    </section>
-  );
+  return <PostPage post={post} />;
 };
 
 export default page;
