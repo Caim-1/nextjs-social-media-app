@@ -16,6 +16,7 @@ Functionality:
 TO-DO:
 
 - Friend requests
+- Display appropriate information when there's no connection to the backend
 
 Profile:
 
